@@ -33,7 +33,6 @@ pub extern "C" fn master_main() -> ! {
     interrupt::init();
     memory::init();
     timer::init();
-    crate::lkm::manager::ModuleManager::init();
     driver::init();
     println!("{}", LOGO);
 

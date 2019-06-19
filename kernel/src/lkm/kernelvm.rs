@@ -2,7 +2,7 @@
 use crate::arch::paging::PageTableImpl;
 use crate::consts::*;
 use crate::memory::GlobalFrameAlloc;
-use crate::sync::SpinLock as Mutex;
+use alloc::boxed::Box;
 use alloc::vec::*;
 use buddy_system_allocator::*;
 use core::alloc::Layout;
@@ -10,9 +10,25 @@ use core::mem::ManuallyDrop;
 use core::ops::DerefMut;
 use core::ptr::NonNull;
 use lazy_static::lazy_static;
+use rcore_lkm::manager::Provider;
+use rcore_lkm::structs::VSpace;
 use rcore_memory::memory_set::handler::{ByFrame, MemoryHandler};
 use rcore_memory::memory_set::MemoryAttr;
 use rcore_memory::{Page, PAGE_SIZE};
+use spin::Mutex;
+use xmas_elf::program::Flags;
+
+/// Default LKM provider in rCore
+#[derive(Default)]
+pub struct ProviderImpl;
+
+impl Provider for ProviderImpl {
+    fn map(&mut self, len: usize) -> Result<Box<VSpace>, &'static str> {
+        VirtualSpace::new(&KERNELVM_MANAGER, len)
+            .map(|x| Box::new(x) as Box<VSpace>)
+            .ok_or("failed to create VirtualSpace")
+    }
+}
 
 ///Allocated virtual memory space by pages. returns some vaddr.
 pub trait MemorySpaceManager {
@@ -53,7 +69,7 @@ impl MemorySpaceManager for LinearManager {
 type VirtualMemorySpaceManager = LinearManager;
 type LockedVMM = Mutex<VirtualMemorySpaceManager>;
 lazy_static! {
-    pub static ref KERNELVM_MANAGER: LockedVMM = Mutex::new(VirtualMemorySpaceManager::new());
+    static ref KERNELVM_MANAGER: LockedVMM = Mutex::new(VirtualMemorySpaceManager::new());
 }
 
 /// Represents a contiguous virtual area: like the ancient const_reloc.
@@ -78,22 +94,25 @@ impl VirtualSpace {
             page_allocator: ByFrame::new(GlobalFrameAlloc),
         })
     }
-    pub fn start(&self) -> usize {
-        self.start
-    }
     pub fn size(&self) -> usize {
         self.size
     }
+}
 
-    pub fn add_area(
-        &mut self,
-        start_addr: usize,
-        end_addr: usize,
-        attr: &MemoryAttr,
-    ) -> &VirtualArea {
-        let area = VirtualArea::new(start_addr, end_addr - start_addr, attr, self);
+impl VSpace for VirtualSpace {
+    fn start(&self) -> usize {
+        self.start
+    }
+    fn add_area(&mut self, start_addr: usize, end_addr: usize, flags: &Flags) {
+        let mut attr = MemoryAttr::default();
+        if flags.is_write() {
+            attr = attr.writable();
+        }
+        if flags.is_execute() {
+            attr = attr.execute();
+        }
+        let area = VirtualArea::new(start_addr, end_addr - start_addr, &attr, self);
         self.areas.push(area);
-        self.areas.last().unwrap()
     }
 }
 
