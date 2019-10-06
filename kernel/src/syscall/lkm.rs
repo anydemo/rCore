@@ -44,6 +44,6 @@ lazy_static! {
     static ref RCORE_API: RcoreAPI = RcoreAPI {
         allocator: &crate::HEAP_ALLOCATOR,
         logger: log::logger(),
-        test: || info!("hello from kernel module"),
+        print: |args| print!("{}", args),
     };
 }

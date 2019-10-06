@@ -68,7 +68,7 @@ rcore-fs-sfs = { git = "https://github.com/rcore-os/rcore-fs", rev = "33f86c47" 
 rcore-fs-ramfs = { git = "https://github.com/rcore-os/rcore-fs", rev = "33f86c47" }
 rcore-fs-mountfs = { git = "https://github.com/rcore-os/rcore-fs", rev = "33f86c47" }
 rcore-fs-devfs = { git = "https://github.com/rcore-os/rcore-fs", rev = "33f86c47" }
-rcore-lkm = { git = "https://github.com/rcore-os/rcore-lkm", rev = "27798b5f" }
+rcore-lkm = { git = "https://github.com/rcore-os/rcore-lkm", rev = "989cf1cb" }
 rcore-api = { path = "../crate/api" }
 
 

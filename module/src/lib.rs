@@ -13,15 +13,16 @@ use core::panic::PanicInfo;
 use rcore_api::RcoreAPI;
 
 #[no_mangle]
+#[cfg_attr(target_arch = "mips", export_name = "__start")]
 pub extern "C" fn _start(api: &'static RcoreAPI) {
     unsafe {
         RCORE_API = Some(api);
     }
     log::set_logger(api.logger).unwrap();
-    (api.test)();
+    info!("Hello from kernel module!");
     let a = vec![1, 2, 3];
     for i in a {
-        warn!("{}", i); // FIXME: ???
+        println!("{}", i);
     }
 }
 
@@ -61,3 +62,20 @@ unsafe impl GlobalAlloc for Allocator {
 
 #[global_allocator]
 static ALLOCATOR: Allocator = Allocator;
+
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ({
+        $crate::print(format_args!($($arg)*));
+    });
+}
+
+#[macro_export]
+macro_rules! println {
+    ($fmt:expr) => (print!(concat!($fmt, "\n")));
+    ($fmt:expr, $($arg:tt)*) => (print!(concat!($fmt, "\n"), $($arg)*));
+}
+
+pub fn print(args: core::fmt::Arguments) {
+    (rcore_api().print)(args);
+}

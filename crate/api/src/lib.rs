@@ -11,8 +11,8 @@ pub struct RcoreAPI {
     pub allocator: &'static dyn GlobalAlloc,
     /// Logger
     pub logger: &'static dyn Log,
-    /// Just for test
-    pub test: fn(),
+    /// Print
+    pub print: fn(args: core::fmt::Arguments),
 }
 
 unsafe impl Send for RcoreAPI {}

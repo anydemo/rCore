@@ -13,11 +13,6 @@
   "linker": "rust-lld",
   "linker-flavor": "ld.lld",
   "linker-is-gnu": true,
-  "pre-link-args": {
-    "ld.lld": [
-      "-Tsrc/arch/aarch64/boot/linker.ld"
-    ]
-  },
   "llvm-target": "aarch64-unknown-none",
   "no-compiler-rt": true,
   "features": "+a53,+strict-align,-neon,-fp-armv8",
@@ -25,7 +20,6 @@
   "os": "none",
   "panic": "abort",
   "panic-strategy": "abort",
-  "relocation-model": "static",
   "position-independent-executables": true,
   "target-c-int-width": "32",
   "target-endian": "little",
