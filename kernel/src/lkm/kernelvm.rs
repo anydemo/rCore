@@ -1,10 +1,9 @@
-// Simple kernel memory set for kernel virtual memory
+//! Simple kernel memory set for kernel virtual memory
 use crate::arch::paging::PageTableImpl;
 use crate::consts::*;
 use crate::memory::GlobalFrameAlloc;
 use alloc::boxed::Box;
 use alloc::vec::*;
-use buddy_system_allocator::*;
 use core::alloc::Layout;
 use core::mem::ManuallyDrop;
 use core::ops::DerefMut;
@@ -23,9 +22,9 @@ use xmas_elf::program::Flags;
 pub struct ProviderImpl;
 
 impl Provider for ProviderImpl {
-    fn map(&mut self, len: usize) -> Result<Box<VSpace>, &'static str> {
+    fn map(&mut self, len: usize) -> Result<Box<dyn VSpace>, &'static str> {
         VirtualSpace::new(&KERNELVM_MANAGER, len)
-            .map(|x| Box::new(x) as Box<VSpace>)
+            .map(|x| Box::new(x) as Box<dyn VSpace>)
             .ok_or("failed to create VirtualSpace")
     }
 }
@@ -66,11 +65,15 @@ impl MemorySpaceManager for LinearManager {
     }
 }
 
+impl LinearManager {
+    const fn new() -> Self {
+        LinearManager { last_page: 0 }
+    }
+}
+
 type VirtualMemorySpaceManager = LinearManager;
 type LockedVMM = Mutex<VirtualMemorySpaceManager>;
-lazy_static! {
-    static ref KERNELVM_MANAGER: LockedVMM = Mutex::new(VirtualMemorySpaceManager::new());
-}
+static KERNELVM_MANAGER: LockedVMM = Mutex::new(VirtualMemorySpaceManager::new());
 
 /// Represents a contiguous virtual area: like the ancient const_reloc.
 /// Use RAII for exception handling

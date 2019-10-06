@@ -20,7 +20,6 @@ extern crate log;
 #[macro_use]
 extern crate lazy_static;
 
-pub use crate::lkm::api::*;
 pub use crate::process::{new_kernel_context, processor};
 pub use buddy_system_allocator::LockedHeapWithRescue;
 pub use rcore_thread::std_thread as thread;
