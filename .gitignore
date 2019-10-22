@@ -29,3 +29,5 @@ Cargo.lock
 modules/*/objs
 # Rust
 modules/*/target
+
+.vagrant

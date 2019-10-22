@@ -226,7 +226,7 @@ else ifeq ($(arch), aarch64)
 prefix ?= aarch64-linux-musl-
 endif
 
-gdb := gdb
+gdb := cgdb
 objdump := cargo objdump $(build_args) -- -print-imm-hex
 objcopy := cargo objcopy -- --binary-architecture=$(subst _,-,$(arch))
 strip := cargo strip --

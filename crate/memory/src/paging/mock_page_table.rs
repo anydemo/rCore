@@ -136,6 +136,7 @@ impl PageTable for MockPageTable {
         self._write(addr);
         self.data[self.translate(addr)] = data;
     }
+    fn flush_cache_copy_user(&mut self, start: VirtAddr, end: VirtAddr, execute: bool){}
 }
 
 impl MockPageTable {
